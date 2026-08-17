@@ -1,0 +1,22 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+
+# IDE settings
+.idea/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# Local configuration and secrets
+.env
+.env.*
+# Usato anche dalla test runner xUnit: resta solo sul computer locale.
+appsettings.Development.json
+secrets.json
