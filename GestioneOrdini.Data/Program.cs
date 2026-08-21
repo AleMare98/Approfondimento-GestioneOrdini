@@ -90,3 +90,4 @@ catch (MySqlException exception)
     Console.WriteLine(
         $"Inserimento fallito come previsto. Errore MySQL: {exception.Number}");
 }
+
