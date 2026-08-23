@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestioneOrdini.Data", "Gest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestioneOrdini.IntegrationTests", "GestioneOrdini.IntegrationTests\GestioneOrdini.IntegrationTests.csproj", "{077A6B62-2DB9-4EC1-9E92-8AB760C26956}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestioneOrdini.Api", "GestioneOrdini.Api\GestioneOrdini.Api.csproj", "{833A0AB8-C33F-4D74-9865-EE12B3DAFDD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{077A6B62-2DB9-4EC1-9E92-8AB760C26956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{077A6B62-2DB9-4EC1-9E92-8AB760C26956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{077A6B62-2DB9-4EC1-9E92-8AB760C26956}.Release|Any CPU.Build.0 = Release|Any CPU
+		{833A0AB8-C33F-4D74-9865-EE12B3DAFDD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833A0AB8-C33F-4D74-9865-EE12B3DAFDD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833A0AB8-C33F-4D74-9865-EE12B3DAFDD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833A0AB8-C33F-4D74-9865-EE12B3DAFDD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
