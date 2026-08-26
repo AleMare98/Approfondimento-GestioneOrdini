@@ -21,6 +21,23 @@ public sealed class ProdottoService
         return prodotti.Select(ToResponse).ToList();
     }
 
+    // AI - inizio filtro e paginazione prodotti
+    public async Task<IReadOnlyList<ProdottoResponse>> SearchAsync(
+        string? nome,
+        int pagina,
+        int dimensionePagina,
+        CancellationToken cancellationToken)
+    {
+        var prodotti = await _prodottoRepository.SearchAsync(
+            nome,
+            pagina,
+            dimensionePagina,
+            cancellationToken);
+
+        return prodotti.Select(ToResponse).ToList();
+    }
+    // AI - fine filtro e paginazione prodotti
+
     public async Task<ProdottoResponse?> GetByIdAsync(int idProdotto, CancellationToken cancellationToken)
     {
         var prodotto = await _prodottoRepository.GetByIdAsync(idProdotto, cancellationToken);

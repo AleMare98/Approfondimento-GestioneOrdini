@@ -17,12 +17,27 @@ public sealed class ProdottoController : ControllerBase
     }
 
     [HttpGet]
+    // AI - inizio filtro e paginazione prodotti
     public async Task<ActionResult<IReadOnlyList<ProdottoResponse>>> GetAll(
-        CancellationToken cancellationToken)
+        string? nome,
+        CancellationToken cancellationToken,
+        int pagina = 1,
+        int dimensionePagina = 10)
     {
-        var prodotti = await _prodottoService.GetAllAsync(cancellationToken);
-        return Ok(prodotti);   
+        if (pagina < 1 || dimensionePagina is < 1 or > 100)
+        {
+            return BadRequest();
+        }
+
+        var prodotti = await _prodottoService.SearchAsync(
+            nome,
+            pagina,
+            dimensionePagina,
+            cancellationToken);
+
+        return Ok(prodotti);
     }
+    // AI - fine filtro e paginazione prodotti
     
     [HttpGet("{idProdotto:int}")]
     public async Task<ActionResult<ProdottoResponse>> GetById(

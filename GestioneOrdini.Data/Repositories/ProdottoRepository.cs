@@ -47,6 +47,39 @@ public sealed class ProdottoRepository : IProdottoRepository
         return lista.ToList();
     }
 
+    // AI - inizio filtro e paginazione prodotti
+    public async Task<IReadOnlyList<Prodotto>> SearchAsync(
+        string? nome,
+        int pagina,
+        int dimensionePagina,
+        CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+                           SELECT IdProdotto, Nome, Prezzo
+                           FROM Prodotti
+                           WHERE (@Nome IS NULL OR Nome LIKE CONCAT('%', @Nome, '%'))
+                           ORDER BY Nome
+                           LIMIT @DimensionePagina OFFSET @Offset;
+                           """;
+
+        var offset = (pagina - 1) * dimensionePagina;
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                Nome = string.IsNullOrWhiteSpace(nome) ? null : nome.Trim(),
+                DimensionePagina = dimensionePagina,
+                Offset = offset
+            },
+            cancellationToken: cancellationToken);
+
+        await using var connection = new MySqlConnection(_connectionString);
+        var prodotti = await connection.QueryAsync<Prodotto>(command);
+
+        return prodotti.ToList();
+    }
+    // AI - fine filtro e paginazione prodotti
+
     public async Task<int> AddAsync(Prodotto prodotto, CancellationToken cancellationToken = default)
     {
          
