@@ -38,6 +38,24 @@ public sealed class ProdottoService
         prodotto.IdProdotto = idProdotto;
         return ToResponse(prodotto);
     }
+
+    public async Task<ProdottoResponse?> UpdateAsync(int idProdotto, AggiornaProdottoRequest request,
+        CancellationToken cancellationToken)
+    {
+        var prodotto = new Prodotto
+        {
+            IdProdotto = idProdotto,
+            Nome = request.Nome,
+            Prezzo = request.Prezzo
+        };
+        return await _prodottoRepository.UpdateAsync(prodotto, cancellationToken) ? ToResponse(prodotto) : null;
+    }
+
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _prodottoRepository.DeleteAsync(id, cancellationToken);
+            
+    }
     private static ProdottoResponse ToResponse(Prodotto prodotto) => new(
         prodotto.IdProdotto,
         prodotto.Nome,

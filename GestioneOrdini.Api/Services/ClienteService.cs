@@ -51,6 +51,23 @@ public sealed class ClienteService
         return ToResponse(cliente);
     }
 
+    public async Task<ClienteResponse?> UpdateAsync(int idCliente, AggiornaClienteRequest request, CancellationToken cancellationToken)
+    {
+        var cliente = new Cliente
+        {
+            IdCliente = idCliente,
+            Nome = request.Nome,
+            Email = request.Email
+        };
+        var stato = await _clienteRepository.UpdateAsync(cliente, cancellationToken);
+        return stato ? ToResponse(cliente) : null;
+    }
+    
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _clienteRepository.DeleteAsync(id, cancellationToken);
+    }
+
     private static ClienteResponse ToResponse(Cliente cliente) => new(
         cliente.IdCliente,
         cliente.Nome,

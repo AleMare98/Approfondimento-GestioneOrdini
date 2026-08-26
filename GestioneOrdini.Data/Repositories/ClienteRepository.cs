@@ -83,5 +83,36 @@ public sealed class ClienteRepository : IClienteRepository
         await using var connection = new MySqlConnection(_connectionString);
         return await connection.ExecuteScalarAsync<int>(command);
     }
-    
+
+    public async Task<bool> UpdateAsync(Cliente cliente, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+                           UPDATE Clienti
+                           SET Nome = @Nome,
+                               Email = @Email
+                           WHERE IdCliente = @IdCliente;
+                           """;
+        var command = new CommandDefinition(
+            sql,
+            new { cliente.IdCliente, cliente.Nome, cliente.Email },
+            cancellationToken: cancellationToken);
+        
+        await using var connection = new MySqlConnection(_connectionString);
+        return await connection.ExecuteAsync(command) > 0;
+    }
+
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+                           DELETE FROM Clienti
+                           WHERE IdCliente = @IdCliente;
+                           """;
+        var command = new CommandDefinition(
+            sql,
+            new { IdCliente = id },
+            cancellationToken: cancellationToken);
+
+        await using var connection = new MySqlConnection(_connectionString);
+        return await connection.ExecuteAsync(command) > 0;
+    }
 }

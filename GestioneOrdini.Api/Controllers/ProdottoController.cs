@@ -44,4 +44,21 @@ public sealed class ProdottoController : ControllerBase
             new { idProdotto = prodotto.Id },
             prodotto);
     }
+    
+    [HttpPut("{idProdotto:int}")]
+    public async Task<ActionResult<ProdottoResponse>> UpdateById(
+        int idProdotto,
+        AggiornaProdottoRequest request,
+        CancellationToken cancellationToken)
+    {
+        var prodotto = await _prodottoService.UpdateAsync(idProdotto, request, cancellationToken);
+        return prodotto is null ? NotFound() : Ok(prodotto);
+    }
+    
+    [HttpDelete("{idProdotto:int}")]
+    public async Task<ActionResult> DeleteById(int idProdotto, CancellationToken cancellationToken)
+    {
+        var stato = await _prodottoService.DeleteAsync(idProdotto, cancellationToken);
+        return stato ? NoContent() : NotFound();
+    }
 }

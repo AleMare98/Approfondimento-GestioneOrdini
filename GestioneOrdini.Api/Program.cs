@@ -1,5 +1,7 @@
 using GestioneOrdini.Api.Services;
 using GestioneOrdini.Data.Repositories;
+using GestioneOrdini.Data.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,13 @@ builder.Services.AddScoped<ClienteService>();
 
 builder.Services.AddScoped<IProdottoRepository>(_ => new ProdottoRepository(connectionString));
 builder.Services.AddScoped<ProdottoService>();
+
+
+// EF
+builder.Services.AddDbContext<GestioneOrdiniDbContext>(options => options.UseMySQL(connectionString));
+
+builder.Services.AddScoped<IOrdineEfRepository, OrdineEfRepository>();
+builder.Services.AddScoped<OrdineService>();
 
 var app = builder.Build();
 

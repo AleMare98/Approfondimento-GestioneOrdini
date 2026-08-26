@@ -49,4 +49,18 @@ public sealed class ClientiController : ControllerBase
             new { idCliente = cliente.Id },
             cliente);
     }
+
+    [HttpPut("{idCliente:int}")]
+    public async Task<ActionResult<ClienteResponse>> UpdateById(int idCliente, AggiornaClienteRequest request, CancellationToken cancellationToken)
+    {
+        var cliente = await _clienteService.UpdateAsync(idCliente, request, cancellationToken);
+        return cliente is null ? NotFound() : Ok(cliente);
+    }
+    
+    [HttpDelete("{idCliente:int}")]
+    public async Task<ActionResult> DeleteById(int idCliente, CancellationToken cancellationToken)
+    {
+        var stato = await _clienteService.DeleteAsync(idCliente, cancellationToken);
+        return stato ? NoContent() : NotFound();
+    }
 }

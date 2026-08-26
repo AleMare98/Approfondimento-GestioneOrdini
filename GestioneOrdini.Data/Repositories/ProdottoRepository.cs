@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using GestioneOrdini.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 
 namespace GestioneOrdini.Data.Repositories;
@@ -58,5 +59,36 @@ public sealed class ProdottoRepository : IProdottoRepository
         
         await using var connection = new MySqlConnection(_connectionString);
         return await connection.ExecuteScalarAsync<int>(command);
+    }
+
+    public async Task<bool> UpdateAsync(Prodotto prodotto, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+                           UPDATE Prodotti
+                           SET Nome = @Nome,
+                           Prezzo = @Prezzo
+                           WHERE IdProdotto = @IdProdotto;
+                           """;
+        
+        var command = new CommandDefinition(
+            sql,
+            new { prodotto.Nome, prodotto.Prezzo, prodotto.IdProdotto },
+            cancellationToken: cancellationToken);
+        
+        await using var connection = new MySqlConnection(_connectionString);
+        return await connection.ExecuteAsync(command) > 0;
+    }
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+                           DELETE FROM Prodotti
+                           WHERE IdProdotto = @IdProdotto;
+                           """;
+        var command = new CommandDefinition(
+            sql,
+            new { IdProdotto = id },
+            cancellationToken: cancellationToken);
+        await using var connection = new MySqlConnection(_connectionString);
+        return await connection.ExecuteAsync(command) > 0;
     }
 }
