@@ -1,3 +1,4 @@
+using GestioneOrdini.Api.Middleware;
 using GestioneOrdini.Api.Services;
 using GestioneOrdini.Data.Repositories;
 using GestioneOrdini.Data.Data;
@@ -9,6 +10,8 @@ var connectionString = builder.Configuration
                            .GetConnectionString("OrdiniDatabase")
                        ?? throw new InvalidOperationException(
                            "Connection string 'OrdiniDatabase' non configurata.");
+
+
 
 // Add services to the container.
 
@@ -32,6 +35,12 @@ builder.Services.AddScoped<IOrdineEfRepository, OrdineEfRepository>();
 builder.Services.AddScoped<OrdineService>();
 
 var app = builder.Build();
+
+// Error handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Correlation ID middleware
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -22,26 +22,16 @@ public sealed class OrdiniController : ControllerBase
         CancellationToken cancellationToken)
     {
         var ordine = await _ordineService.GetByIdAsync(idOrdine, cancellationToken);
-        return ordine is null ? NotFound() : Ok(ordine);
+        return  Ok(ordine);
     }
     
     [HttpPost]
     public async Task<ActionResult<OrdineResponse>> CreateAsync(
-        CreaOrdineRequest? request,
+        CreaOrdineRequest request,
         CancellationToken cancellationToken)
     {
-        if (request is null ||
-            request.IdCliente <= 0 ||
-            request.Righe is null ||
-            request.Righe.Count == 0 ||
-            request.Righe.Any(riga => riga.Quantita <= 0))
-        {
-            return BadRequest();
-        }
         var ordine = await _ordineService.CreateAsync(request, cancellationToken);
-        return ordine is null
-            ? NotFound()
-            : CreatedAtAction(nameof(GetById),
-                new { idOrdine = ordine.Id }, ordine);
+        return CreatedAtAction(nameof(GetById), 
+            new { idOrdine = ordine.Id }, ordine);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GestioneOrdini.Api.Contracts.Ordini;
+using GestioneOrdini.Api.Errors;
 using GestioneOrdini.Data.Models;
 using GestioneOrdini.Data.Repositories;
 
@@ -9,21 +10,23 @@ public sealed class OrdineService
     private readonly IOrdineEfRepository _ordineEfRepository;
     private readonly IProdottoRepository _prodottoRepository;
     private readonly IClienteRepository _clienteRepository;
+    private readonly ILogger<OrdineService> _logger;
     
-    public OrdineService(IOrdineEfRepository ordineEfRepository, IProdottoRepository prodottoRepository, IClienteRepository clienteRepository)
+    public OrdineService(IOrdineEfRepository ordineEfRepository, IProdottoRepository prodottoRepository, IClienteRepository clienteRepository, ILogger<OrdineService> logger)
     {
         _ordineEfRepository = ordineEfRepository;
         _prodottoRepository = prodottoRepository;
         _clienteRepository = clienteRepository;
+        _logger = logger;
     }
     
-    public async Task<OrdineResponse?> CreateAsync(CreaOrdineRequest request, CancellationToken cancellationToken)
+    public async Task<OrdineResponse> CreateAsync(CreaOrdineRequest request, CancellationToken cancellationToken)
     {
         var cliente = await _clienteRepository.GetByIdAsync(request.IdCliente, cancellationToken);
 
         if (cliente is null)
         {
-            return null;
+            throw new ResourceNotFoundException($"Cliente con ID {request.IdCliente} non trovato.");
         }
 
         var righe = new List<NuovaRigaOrdine>();
@@ -34,7 +37,7 @@ public sealed class OrdineService
 
             if (prodotto is null)
             {
-                return null;
+                throw new ResourceNotFoundException($"Prodotto con ID {rigaRequest.IdProdotto} non trovato.");
             }
 
             righe.Add(new NuovaRigaOrdine(rigaRequest.IdProdotto, rigaRequest.Quantita, prodotto.Prezzo));
@@ -46,14 +49,22 @@ public sealed class OrdineService
 
         var ordine = await _ordineEfRepository.GetByIdAsync(idOrdine, cancellationToken) ?? throw new InvalidOperationException(
             "Ordine creato ma non trovato durante la rilettura.");
+        
+        _logger.LogInformation(
+            "Ordine {IdOrdine} creato per cliente {IdCliente} con {NumeroRighe} righe", ordine.IdOrdine, request.IdCliente, ordine.Righe.Count);
 
         return ToResponse(ordine);
     }
-    public async Task<OrdineResponse?> GetByIdAsync(int idOrdine, CancellationToken cancellationToken)
+    public async Task<OrdineResponse> GetByIdAsync(int idOrdine, CancellationToken cancellationToken)
     {
         var ordine = await _ordineEfRepository.GetByIdAsync(idOrdine, cancellationToken);
 
-        return ordine is null ? null : ToResponse(ordine);
+        if (ordine is null)
+        {
+            throw new ResourceNotFoundException($"Ordine con ID {idOrdine} non trovato.");
+        }
+
+        return ToResponse(ordine);
     }
 
     private static OrdineResponse ToResponse(Ordine ordine)

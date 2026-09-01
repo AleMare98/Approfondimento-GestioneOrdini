@@ -1,4 +1,5 @@
 ﻿using GestioneOrdini.Api.Contracts.Clienti;
+using GestioneOrdini.Api.Errors;
 using GestioneOrdini.Data.Models;
 using GestioneOrdini.Data.Repositories;
 
@@ -21,15 +22,20 @@ public sealed class ClienteService
         return clienti.Select(ToResponse).ToList();
     }
     
-    public async Task<ClienteResponse?> GetByIdAsync(
+    public async Task<ClienteResponse> GetByIdAsync(
         int idCliente,
         CancellationToken cancellationToken)
     {
         var cliente = await _clienteRepository.GetByIdAsync(
             idCliente,
             cancellationToken);
+        
+        if (cliente is null)
+        {
+            throw new ResourceNotFoundException($"Cliente con ID {idCliente} non trovato.");
+        }
 
-        return cliente is null ? null : ToResponse(cliente);
+        return  ToResponse(cliente);
     }
     
     public async Task<ClienteResponse> CreateAsync(
@@ -41,6 +47,12 @@ public sealed class ClienteService
             Nome = request.Nome,
             Email = request.Email
         };
+        
+        var clienteEsistente = await _clienteRepository.GetByEmailAsync(request.Email, cancellationToken);
+        if (clienteEsistente is not null)
+        {
+            throw new ResourceConflictException("Esiste già un cliente con questa email");
+        }
 
         var idCliente = await _clienteRepository.AddAsync(
             cliente,
@@ -51,7 +63,7 @@ public sealed class ClienteService
         return ToResponse(cliente);
     }
 
-    public async Task<ClienteResponse?> UpdateAsync(int idCliente, AggiornaClienteRequest request, CancellationToken cancellationToken)
+    public async Task<ClienteResponse> UpdateAsync(int idCliente, AggiornaClienteRequest request, CancellationToken cancellationToken)
     {
         var cliente = new Cliente
         {
@@ -59,13 +71,32 @@ public sealed class ClienteService
             Nome = request.Nome,
             Email = request.Email
         };
+        
+        var clienteEsistente = await _clienteRepository.GetByEmailAsync(request.Email, cancellationToken);
+
+        if (clienteEsistente is not null && clienteEsistente.IdCliente != idCliente)
+        {
+            throw new ResourceConflictException("Esiste giò un cliente con questa email");
+        }
+        
         var stato = await _clienteRepository.UpdateAsync(cliente, cancellationToken);
-        return stato ? ToResponse(cliente) : null;
+        
+        if (!stato)
+        {
+            throw new ResourceNotFoundException($"Cliente con ID {idCliente} non trovato.");
+        }
+        
+        return ToResponse(cliente);
     }
     
-    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _clienteRepository.DeleteAsync(id, cancellationToken);
+        var stato = await _clienteRepository.DeleteAsync(id, cancellationToken);
+        if (!stato)
+        {
+            throw new ResourceNotFoundException($"Cliente con ID {id} non trovato.");
+        }
+        
     }
 
     private static ClienteResponse ToResponse(Cliente cliente) => new(

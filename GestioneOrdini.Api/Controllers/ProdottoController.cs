@@ -21,14 +21,12 @@ public sealed class ProdottoController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<ProdottoResponse>>> GetAll(
         string? nome,
         CancellationToken cancellationToken,
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue)]
         int pagina = 1,
+
+        [System.ComponentModel.DataAnnotations.Range(1, 100)]
         int dimensionePagina = 10)
     {
-        if (pagina < 1 || dimensionePagina is < 1 or > 100)
-        {
-            return BadRequest();
-        }
-
         var prodotti = await _prodottoService.SearchAsync(
             nome,
             pagina,
@@ -45,7 +43,7 @@ public sealed class ProdottoController : ControllerBase
         CancellationToken cancellationToken)
     {
         var prodotto = await _prodottoService.GetByIdAsync(idProdotto, cancellationToken);
-        return prodotto is null ? NotFound() : Ok(prodotto);
+        return Ok(prodotto);
     }
     
     [HttpPost]
@@ -67,13 +65,13 @@ public sealed class ProdottoController : ControllerBase
         CancellationToken cancellationToken)
     {
         var prodotto = await _prodottoService.UpdateAsync(idProdotto, request, cancellationToken);
-        return prodotto is null ? NotFound() : Ok(prodotto);
+        return Ok(prodotto);
     }
     
     [HttpDelete("{idProdotto:int}")]
     public async Task<ActionResult> DeleteById(int idProdotto, CancellationToken cancellationToken)
     {
-        var stato = await _prodottoService.DeleteAsync(idProdotto, cancellationToken);
-        return stato ? NoContent() : NotFound();
+        await _prodottoService.DeleteAsync(idProdotto, cancellationToken);
+        return NoContent();
     }
 }

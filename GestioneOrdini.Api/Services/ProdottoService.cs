@@ -1,8 +1,8 @@
 ﻿
 using GestioneOrdini.Api.Contracts.Prodotti;
+using GestioneOrdini.Api.Errors;
 using GestioneOrdini.Data.Models;
 using GestioneOrdini.Data.Repositories;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 
 
 namespace GestioneOrdini.Api.Services;
@@ -38,10 +38,14 @@ public sealed class ProdottoService
     }
     // AI - fine filtro e paginazione prodotti
 
-    public async Task<ProdottoResponse?> GetByIdAsync(int idProdotto, CancellationToken cancellationToken)
+    public async Task<ProdottoResponse> GetByIdAsync(int idProdotto, CancellationToken cancellationToken)
     {
         var prodotto = await _prodottoRepository.GetByIdAsync(idProdotto, cancellationToken);
-        return prodotto is null ? null : ToResponse(prodotto);
+        if (prodotto is null)
+        {
+            throw new ResourceNotFoundException($"prodotto con ID {idProdotto} non trovato.");
+        }
+        return ToResponse(prodotto);
     }
 
     public async Task<ProdottoResponse> CreateAsync(CreaProdottoRequest request, CancellationToken cancellationToken)
@@ -56,7 +60,7 @@ public sealed class ProdottoService
         return ToResponse(prodotto);
     }
 
-    public async Task<ProdottoResponse?> UpdateAsync(int idProdotto, AggiornaProdottoRequest request,
+    public async Task<ProdottoResponse> UpdateAsync(int idProdotto, AggiornaProdottoRequest request,
         CancellationToken cancellationToken)
     {
         var prodotto = new Prodotto
@@ -65,13 +69,24 @@ public sealed class ProdottoService
             Nome = request.Nome,
             Prezzo = request.Prezzo
         };
-        return await _prodottoRepository.UpdateAsync(prodotto, cancellationToken) ? ToResponse(prodotto) : null;
+        var stato = await _prodottoRepository.UpdateAsync(prodotto, cancellationToken);
+        if (!stato)
+        {
+            throw new ResourceNotFoundException($"prodotto con ID {idProdotto} non trovato.");
+        }
+
+        return ToResponse(prodotto);
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _prodottoRepository.DeleteAsync(id, cancellationToken);
-            
+        var stato = await _prodottoRepository.DeleteAsync(id, cancellationToken);
+        if (!stato)
+        {
+            throw new ResourceNotFoundException($"prodotto con ID {id} non trovato.");
+        }
+        
+
     }
     private static ProdottoResponse ToResponse(Prodotto prodotto) => new(
         prodotto.IdProdotto,
